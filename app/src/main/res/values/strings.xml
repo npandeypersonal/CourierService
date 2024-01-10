@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">CourierService</string>
+    <string name="base_price">Base Price</string>
+    <string name="package_id">Package Id</string>
+    <string name="package_weight">Package weight in KG</string>
+    <string name="distance">Distance in KM</string>
+    <string name="offer_code">Offer code</string>
+    <string name="add_package">Add Package</string>
+    <string name="offer_id">Offer ID</string>
+    <string name="discount_percentage">Discount Percentage</string>
+    <string name="add_offer">Add New Offer</string>
+    <string name="delivery_cost">Delivery Cost</string>
+    <string name="delivery_time">Delivery Time</string>
+    <string name="max_weight">Max weight</string>
+    <string name="min_weight">Min weight</string>
+    <string name="min_discount">Min discount</string>
+    <string name="max_discount">Max discount</string>
+    <string name="total_vehicle">Total vehicle</string>
+    <string name="max_speed">Max speed</string>
+    <string name="max_load_capacity">Max load capacity</string>
+</resources>
