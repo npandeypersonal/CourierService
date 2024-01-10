@@ -5,10 +5,12 @@ an offer code (if applicable).
 2. Calculate the estimated delivery time for every package by maximizing no. of packages in every shipment
 
 # Libraries 
-This project using some libraries as follow
+This project using some libraries as follow.
+
  AndroidX, MVVM, Coroutines, Hilt, Room, View Binding, Junit, Mockito, LiveData,Repository pattern etc..
 # Design Pattern:
 List of some design pattern use in this.
+
   Builder patter, Factory pattern, Singleton, Repository, Proxy etc..
 
 # Project Flow
