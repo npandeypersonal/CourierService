@@ -4,9 +4,11 @@ This repository contains a CourierService project in Kotlin to solve below 2 cha
 an offer code (if applicable).
 2. Calculate the estimated delivery time for every package by maximizing no. of packages in every shipment
 
+# Libraries 
 This project using some libraries as follow
  AndroidX, MVVM, Coroutines, Hilt, Room, View Binding, Junit, Mockito, LiveData,Repository pattern etc..
-List of some pattern use in this.
+# Design Pattern:
+List of some design pattern use in this.
   Builder patter, Factory pattern, Singleton, Repository, Proxy etc..
 
 # Project Flow
