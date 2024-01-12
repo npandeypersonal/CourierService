@@ -22,6 +22,7 @@ import com.courierservice.challenge.data.models.VehicleDetails
 import com.courierservice.challenge.databinding.VehicleDetailsLayoutBinding
 import com.courierservice.challenge.viewmodel.CourierServiceViewModel
 import com.courierservice.challenge.viewmodel.OfferViewModel
+import kotlin.math.max
 
 
 @AndroidEntryPoint
@@ -37,7 +38,9 @@ class CourierServiceActivity : AppCompatActivity() {
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         val view: View = activityMainBinding.root
         setContentView(view)
-        initData();
+        initView()
+        syncInitialData()
+        addObserverListener()
         clickListener()
     }
 
@@ -50,20 +53,7 @@ class CourierServiceActivity : AppCompatActivity() {
         activityMainBinding.deliveryTimeBtn.setOnClickListener{ addVehicleDetails() }
     }
 
-    private fun initData() {
-        val list: MutableList<OfferEntity> = mutableListOf()
-        val offer001 = OfferEntity("OFR001",10.0,0.0,200.0,70.0,200.0)
-        val offer002 = OfferEntity("OFR002",7.0,50.0,150.0,100.0,250.0)
-        val offer003 = OfferEntity("OFR003",5.0,50.0,250.0,10.0,150.0)
-        list.add(offer001)
-        list.add(offer002)
-        list.add(offer003)
-        try {
-            offerViewModel.addOfferList(list)
-        }catch (e: SQLiteConstraintException){
-            println("Error: $e")
-        }
-
+    private fun initView() {
         courierServiceAdapter = CourierServiceAdapter(this, packageList)
         activityMainBinding.mRecycler.layoutManager = LinearLayoutManager(this)
         activityMainBinding.mRecycler.adapter = courierServiceAdapter
@@ -72,14 +62,54 @@ class CourierServiceActivity : AppCompatActivity() {
             DividerItemDecoration(this,
             DividerItemDecoration.VERTICAL)
         )
+
+    }
+    private fun syncInitialData(){
+        try {
+            offerViewModel.addOfferList(mutableListOf())
+        }catch (e: SQLiteConstraintException){
+            println("Error: $e")
+        }
+    }
+    private fun addObserverListener(){
         courierServiceViewModel.deliveryCostList.observe(this){
             packageList.clear()
             packageList.addAll(it)
             courierServiceAdapter.notifyDataSetChanged()
         }
+        offerViewModel.validationStatus.observe(this){
+            if (it.second){
+                it.first?.let {offerEntity->
+                    offerViewModel.addOffer(offerEntity)
+                    Toast.makeText(this, "Adding User Information Success", Toast.LENGTH_SHORT).show()
+                }
+
+            } else {
+                Toast.makeText(this,"Please enter all details",Toast.LENGTH_LONG).show()
+            }
+        }
+        packageDetailsViewModel.validationStatus.observe(this){
+            if (it.second){
+                it.first?.let {pkgObj->
+                    packageDetailsViewModel.addPackageDetails(pkgObj)
+                    Toast.makeText(this, "Package Information Success", Toast.LENGTH_SHORT).show()
+                }
+            }else {
+                Toast.makeText(this,"Please enter all details",Toast.LENGTH_LONG).show()
+            }
+        }
+        courierServiceViewModel.validationStatus.observe(this){
+            if (it.second){
+                it.first?.let {vehicleDetails->
+                    courierServiceViewModel.getDeliveryTimeEstimation(vehicleDetails)
+                }
+            }else {
+                Toast.makeText(this,"Please enter all details",Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
-    fun addPackage() {
+    private fun addPackage() {
         val addItemLayoutBinding = AddItemLayoutBinding.inflate(LayoutInflater.from(this), activityMainBinding.root, false)
         val view: View = addItemLayoutBinding.root
         val addDialog = AlertDialog.Builder(this)
@@ -92,22 +122,8 @@ class CourierServiceActivity : AppCompatActivity() {
             val pkgWeight = addItemLayoutBinding.pkgWeightTxt.text.toString()
             val distance = addItemLayoutBinding.distanceTxt.text.toString()
             val offerCode = addItemLayoutBinding.offerCodeTxt.text.toString()
-            if (offerCode.isEmpty() || pkgId.isEmpty() || basePrice.isEmpty() || pkgWeight.isEmpty()
-                || distance.isEmpty()){
-                Toast.makeText(this,"Please enter all details",Toast.LENGTH_LONG).show()
-            }else {
-                packageDetailsViewModel.addPackageDetails(
-                    PackageDetailsEntity(
-                        pkgId,
-                        basePrice.toDouble(),
-                        pkgWeight.toDouble(),
-                        distance.toDouble(),
-                        offerCode
-                    )
-                )
-                Toast.makeText(this, "Package Information Success", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
-            }
+            packageDetailsViewModel.inputValidation(pkgId,basePrice,pkgWeight,distance,offerCode)
+            dialog.dismiss()
         }
         addDialog.setNegativeButton("Cancel"){
                 dialog,_->
@@ -131,16 +147,9 @@ class CourierServiceActivity : AppCompatActivity() {
             val maxDiscount = addOfferLayoutBinding.maxDiscountTxt.text.toString()
             val minWeight = addOfferLayoutBinding.minWeightTxt.text.toString()
             val maxWeight = addOfferLayoutBinding.maxWeightTxt.text.toString()
-            if (offerCode.isEmpty() || percentage.isEmpty() || minDiscount.isEmpty() || maxDiscount.isEmpty()
-                || minWeight.isEmpty() || maxWeight.isEmpty()){
-                Toast.makeText(this,"Please enter all details",Toast.LENGTH_LONG).show()
-            } else {
-                val offerEntity =
-                    OfferEntity(offerCode, percentage.toDouble(), 0.0, 200.0, 70.0, 200.0)
-                offerViewModel.addOffer(offerEntity)
-                Toast.makeText(this, "Adding User Information Success", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
-            }
+
+            offerViewModel.inputValidation(offerCode, percentage, minDiscount, maxDiscount, minWeight, maxWeight)
+            dialog.dismiss()
         }
         addDialog.setNegativeButton("Cancel"){
                 dialog,_->
@@ -161,20 +170,8 @@ class CourierServiceActivity : AppCompatActivity() {
             val totalVehicle = vehicleLayoutBinding.totalVehicleTxt.text.toString()
             val maxSpeed = vehicleLayoutBinding.maxSpeedTxt.text.toString()
             val loadCapacity = vehicleLayoutBinding.maxLoadTxt.text.toString()
-
-            if (totalVehicle.isEmpty() || maxSpeed.isEmpty() || loadCapacity.isEmpty()){
-                Toast.makeText(this,"Please enter all details",Toast.LENGTH_LONG).show()
-                return@setPositiveButton
-            } else {
-                val vehicleDetails = VehicleDetails(
-                    totalVehicle.toInt(),
-                    maxSpeed.toDouble(),
-                    loadCapacity.toDouble()
-                )
-                courierServiceViewModel.getDeliveryTimeEstimation(vehicleDetails)
-                Toast.makeText(this, "Adding User Information Success", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
-            }
+            courierServiceViewModel.inputValidation(totalVehicle, maxSpeed,loadCapacity)
+            dialog.dismiss()
         }
         addDialog.setNegativeButton("Cancel"){
                 dialog,_->

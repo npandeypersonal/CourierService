@@ -28,6 +28,9 @@ class CourierServiceViewModel @Inject constructor(): ViewModel() {
     private var mutualDeliveryCostList = MutableLiveData<List<PackageDetails>>()
     val deliveryCostList: LiveData<List<PackageDetails>> = mutualDeliveryCostList
 
+    private var validatedObject = MutableLiveData<Pair<VehicleDetails?,Boolean>>()
+    val validationStatus: LiveData<Pair<VehicleDetails?,Boolean>> = validatedObject
+
     fun getDeliveryCost(){
         viewModelScope.launch{
             val packageList = viewModelScope.async(Dispatchers.IO) { iPackageDetailsRepository.getPackageDetails() }.await()
@@ -65,5 +68,12 @@ class CourierServiceViewModel @Inject constructor(): ViewModel() {
             deliveryCostList.add(PackageDetails(it.pkgId,discount.toString(),totalCost.toString()))
         }
         return deliveryCostList
+    }
+    fun inputValidation(totalVehicle:String, maxSpeed:String, maxLoad:String){
+        if(totalVehicle.isEmpty() || maxSpeed.isEmpty() || maxLoad.isEmpty() ){
+            validatedObject.postValue(Pair(null,false))
+            return
+        }
+        validatedObject.postValue(Pair(VehicleDetails(totalVehicle.toInt(),maxSpeed.toDouble(),maxLoad.toDouble()),true))
     }
 }

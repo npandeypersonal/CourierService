@@ -18,6 +18,8 @@ class PackageDetailsViewModel @Inject constructor(private val iPackageDetailsRep
     : ViewModel() {
     private var mutualPackageDetails = MutableLiveData<List<PackageDetailsEntity>>()
     val packageDetails: LiveData<List<PackageDetailsEntity>> = mutualPackageDetails
+    private var validatedObject = MutableLiveData<Pair<PackageDetailsEntity?,Boolean>>()
+    val validationStatus: LiveData<Pair<PackageDetailsEntity?,Boolean>> = validatedObject
 
     fun addPackageDetails(packageDetailsEntity: PackageDetailsEntity){
         viewModelScope.launch(Dispatchers.IO) {
@@ -26,5 +28,13 @@ class PackageDetailsViewModel @Inject constructor(private val iPackageDetailsRep
                 mutualPackageDetails.postValue(mutableListOf(packageDetailsEntity))
             }
         }
+    }
+    fun inputValidation(pkgId:String, baseCost:String, pkgWeight:String, pkgDistance:String, offerCode:String){
+        if(offerCode.isEmpty() || pkgId.isEmpty() || baseCost.isEmpty() || pkgWeight.isEmpty()
+            || pkgDistance.isEmpty()){
+            validatedObject.postValue(Pair(null,false))
+            return
+        }
+        validatedObject.postValue(Pair(PackageDetailsEntity(pkgId,baseCost.toDouble(),pkgWeight.toDouble(),pkgDistance.toDouble(),offerCode),true))
     }
 }
