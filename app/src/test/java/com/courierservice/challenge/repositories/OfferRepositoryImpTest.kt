@@ -6,7 +6,10 @@ import com.courierservice.challenge.data.database.entities.OfferEntity
 import com.courierservice.challenge.data.repositories.IOfferRepository
 import com.courierservice.challenge.data.repositories.OfferRepositoryImp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
@@ -23,6 +26,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
+@ExperimentalCoroutinesApi
 class OfferRepositoryImpTest {
 
     @get:Rule
@@ -36,7 +40,7 @@ class OfferRepositoryImpTest {
     @Before
     fun setup() {
         MockitoAnnotations.openMocks(this)
-        Dispatchers.setMain(TestCoroutineDispatcher())
+        Dispatchers.setMain(UnconfinedTestDispatcher())
         offerRepository = OfferRepositoryImp(offerDao)
     }
     @After
@@ -45,7 +49,7 @@ class OfferRepositoryImpTest {
     }
 
     @Test
-    fun testAddOfferData() = runBlockingTest {
+    fun testAddOfferData() = runBlocking {
         val offerEntity = OfferEntity("OFR001", 10.0, 0.0, 200.0, 70.0, 200.0)
 
         offerRepository.addOfferData(offerEntity)
@@ -54,7 +58,7 @@ class OfferRepositoryImpTest {
     }
 
     @Test
-    fun testAddOfferListData() = runBlockingTest {
+    fun testAddOfferListData() = runBlocking {
         val offerList = listOf(
             OfferEntity("OFR001", 10.0, 0.0, 200.0, 70.0, 200.0),
             OfferEntity("OFR002", 7.0, 50.0, 150.0, 100.0, 250.0)
@@ -65,7 +69,7 @@ class OfferRepositoryImpTest {
     }
 
     @Test
-    fun testGetOfferByCode() = runBlockingTest {
+    fun testGetOfferByCode() = runBlocking {
         val offerEntity = OfferEntity("OFR001", 10.0, 0.0, 200.0, 70.0, 200.0)
         `when`(offerDao.getOfferByCode("OFR001")).thenReturn(offerEntity)
 

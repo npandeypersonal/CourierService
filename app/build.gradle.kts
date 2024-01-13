@@ -36,9 +36,12 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
-
         viewBinding = true
-
+    }
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
     }
 }
 

@@ -10,8 +10,10 @@ import com.courierservice.challenge.data.repositories.OfferRepositoryImp
 import com.courierservice.challenge.data.repositories.PackageDetailsRepository
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
@@ -29,6 +31,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
+@ExperimentalCoroutinesApi
 class PackageDetailsRepositoryTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -41,7 +44,7 @@ class PackageDetailsRepositoryTest {
     @Before
     fun setup() {
         MockitoAnnotations.openMocks(this)
-        Dispatchers.setMain(TestCoroutineDispatcher())
+        Dispatchers.setMain(UnconfinedTestDispatcher())
         packageDetailsRepository = PackageDetailsRepository(packageDetailsDao)
     }
     @After

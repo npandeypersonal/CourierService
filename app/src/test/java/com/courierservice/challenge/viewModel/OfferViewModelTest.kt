@@ -7,7 +7,11 @@ import com.courierservice.challenge.data.models.VehicleDetails
 import com.courierservice.challenge.data.repositories.IOfferRepository
 import com.courierservice.challenge.viewmodel.OfferViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
@@ -19,10 +23,12 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
+@ExperimentalCoroutinesApi
 class OfferViewModelTest {
 
     @get:Rule
@@ -37,28 +43,31 @@ class OfferViewModelTest {
     fun setUp() {
         MockitoAnnotations.openMocks(this)
         // Set up the main dispatcher for testing
-        Dispatchers.setMain(TestCoroutineDispatcher())
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+
         offerViewModel = OfferViewModel(iOfferRepository)
     }
 
     @Test
-    fun `test addOffer`() = runBlockingTest{
+    fun `test addOffer`() = runBlocking{
         // Mock data
          val offer = OfferEntity("OFR001", 5.0, 0.0, 200.0, 70.0, 200.0)
 
         // Call the method
         offerViewModel.addOffer(offer)
 
+        delay(1000)
         verify(iOfferRepository).addOfferData(offer)
     }
 
     @Test
-    fun `test addOfferList`() = runBlockingTest{
+    fun `test addOfferList`() = runBlocking{
         // Mock data
-        val offer = listOf(OfferEntity("OFR001", 5.0, 0.0, 200.0, 70.0, 200.0))
+        val offer = mutableListOf(OfferEntity("OFR001", 5.0, 0.0, 200.0, 70.0, 200.0))
 
         // Call the method
         offerViewModel.addOfferList(offer)
+        delay(1000)
 
         verify(iOfferRepository).addOfferListData(offer)
     }

@@ -8,6 +8,9 @@ import com.courierservice.challenge.data.repositories.IOfferRepository
 import com.courierservice.challenge.data.repositories.IPackageDetailsRepository
 import com.courierservice.challenge.viewmodel.CourierServiceViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
@@ -25,6 +28,7 @@ import org.mockito.junit.MockitoJUnitRunner
 
 
 @RunWith(MockitoJUnitRunner::class)
+@ExperimentalCoroutinesApi
 class CourierServiceViewModelTest {
 
     @get:Rule
@@ -42,41 +46,42 @@ class CourierServiceViewModelTest {
     fun setUp() {
         MockitoAnnotations.openMocks(this)
         // Set up the main dispatcher for testing
-        Dispatchers.setMain(TestCoroutineDispatcher())
+        Dispatchers.setMain(Dispatchers.Unconfined)
         courierServiceViewModel = CourierServiceViewModel()
         courierServiceViewModel.iPackageDetailsRepository = iPackageDetailsRepository
         courierServiceViewModel.iOfferRepository = iOfferRepository
     }
 
     @Test
-    fun `test getDeliveryCost`() = runBlockingTest{
+    fun `test getDeliveryCost`(): Unit = runBlocking{
         // Mock data
         val packageList = listOf(PackageDetailsEntity("1", 10.0, 5.0, 100.0, "OFR001"))
         val offer = OfferEntity("OFR001", 5.0, 0.0, 200.0, 70.0, 200.0)
 
         // Mocking behavior
-            `when`(iPackageDetailsRepository.getPackageDetails()).thenReturn(packageList)
+            `when`(courierServiceViewModel.iPackageDetailsRepository.getPackageDetails()).thenReturn(packageList)
             `when`(courierServiceViewModel.iOfferRepository.getOfferByCode("OFR001")).thenReturn(offer)
 
         // Call the method
         courierServiceViewModel.getDeliveryCost()
 
-        verify(iPackageDetailsRepository).getPackageDetails()
+        verify(courierServiceViewModel.iPackageDetailsRepository).getPackageDetails()
     }
 
     @Test
-    fun `test getDeliveryTimeEstimation`() = runBlockingTest{
+    fun `test getDeliveryTimeEstimation`(): Unit = runBlocking{
         // Mock data
         val packageList = listOf(PackageDetailsEntity("1", 10.0, 5.0, 100.0, "OFR001"))
         val offer = OfferEntity("OFR001", 5.0, 0.0, 200.0, 70.0, 200.0)
 
         // Mocking behavior
         `when`(iPackageDetailsRepository.getPackageDetails()).thenReturn(packageList)
-        `when`(courierServiceViewModel.iOfferRepository.getOfferByCode("OFR001")).thenReturn(offer)
+        `when`(iOfferRepository.getOfferByCode("OFR001")).thenReturn(offer)
 
         // Call the method
         courierServiceViewModel.getDeliveryTimeEstimation(VehicleDetails(2,70.00,200.00))
 
+        delay(1000)
         verify(iPackageDetailsRepository).getPackageDetails()
     }
 

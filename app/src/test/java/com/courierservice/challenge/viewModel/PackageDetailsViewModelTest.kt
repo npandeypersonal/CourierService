@@ -9,7 +9,10 @@ import com.courierservice.challenge.data.repositories.IPackageDetailsRepository
 import com.courierservice.challenge.viewmodel.CourierServiceViewModel
 import com.courierservice.challenge.viewmodel.PackageDetailsViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
@@ -26,6 +29,7 @@ import org.mockito.junit.MockitoJUnitRunner
 
 
 @RunWith(MockitoJUnitRunner::class)
+@ExperimentalCoroutinesApi
 class PackageDetailsViewModelTest {
 
     @get:Rule
@@ -39,17 +43,14 @@ class PackageDetailsViewModelTest {
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
-        Dispatchers.setMain(TestCoroutineDispatcher())
+        Dispatchers.setMain(UnconfinedTestDispatcher())
         packageDetailsViewModel = PackageDetailsViewModel(iPackageDetailsRepository)
     }
 
     @Test
-    fun `test addPackageDetails`() = runBlockingTest{
+    fun `test addPackageDetails`(): Unit = runBlocking{
         // Mock data
         val packageDetails = PackageDetailsEntity("1", 10.0, 5.0, 100.0, "OFR001")
-        // Mocking behavior
-        `when`(iPackageDetailsRepository.addPackageDetails(packageDetails)).thenReturn(true)
-
         // Call the method
         packageDetailsViewModel.addPackageDetails(packageDetails)
 
